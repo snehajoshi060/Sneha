@@ -12,7 +12,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/your-repo/one-click-infra.git'
+                git 'https://github.com/snehajoshi060/Sneha.git'
             }
         }
 
