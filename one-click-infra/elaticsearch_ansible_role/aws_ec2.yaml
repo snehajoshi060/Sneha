@@ -1,0 +1,13 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+
+hostnames:
+  - tag:Name
+
+filters:
+  instance-state-name: running
+
+compose:
+  ansible_host: public_ip_address
+  ansible_user: "{{ 'ec2-user' if (tags.Name is defined and 'amazon' in tags.Name | lower) else 'ubuntu' }}"
