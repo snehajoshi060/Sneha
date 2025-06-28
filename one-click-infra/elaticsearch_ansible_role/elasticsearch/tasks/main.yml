@@ -1,9 +1,11 @@
-# ------------------ DEBIAN FAMILY TASKS ------------------
-- name: Clean up Elasticsearch configs on Debian
+---
+
+# ---------------- DEBIAN FAMILY ----------------
+- name: Cleanup any existing config files (Debian)
   file:
     path: "{{ item }}"
     state: absent
-  with_items:
+  loop:
     - /etc/elasticsearch/elasticsearch.keystore
     - /usr/share/elasticsearch/config/certs
     - /usr/share/elasticsearch/config/elasticsearch.keystore
@@ -16,203 +18,110 @@
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
-- name: Upgrade all packages on servers
+- name: Upgrade all packages
   apt:
     upgrade: dist
     force_apt_get: yes
   when: ansible_os_family == "Debian"
 
-- name: Install necessary packages on Debian
+- name: Install packages (Debian)
   apt:
     name:
-      - nginx
       - openjdk-17-jdk
-      - vim
+      - nginx
       - wget
+      - vim
     state: present
   when: ansible_os_family == "Debian"
 
-- name: Import the Elasticsearch PGP key on Debian
+- name: Add Elasticsearch GPG key (Debian)
   apt_key:
     url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
     keyring: /usr/share/keyrings/elasticsearch-keyring.gpg
     state: present
   when: ansible_os_family == "Debian"
 
-- name: Add the Elasticsearch repository on Debian
+- name: Add Elasticsearch repo (Debian)
   lineinfile:
     path: /etc/apt/sources.list.d/elastic-8.x.list
     line: "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main"
     create: yes
   when: ansible_os_family == "Debian"
 
-- name: Install Elasticsearch package on Debian
+- name: Install Elasticsearch (Debian)
   apt:
     name: elasticsearch
     state: present
     update_cache: yes
-  notify:
+  when: ansible_os_family == "Debian"
+  notify: 
     - Enable Elasticsearch
-    - Start Elasticsearch
-  when: ansible_os_family == "Debian"
+    - Restart Elasticsearch
 
-- name: Configure elasticsearch.yml on Debian
-  block:
-    - name: Set network.host to 0.0.0.0
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^#?network.host:'
-        line: 'network.host: 0.0.0.0'
-
-    - name: Set http.port to 9200
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^#?http.port:'
-        line: 'http.port: 9200'
-
-    - name: Disable security for demo
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        line: '{{ item }}'
-        create: yes
-      loop:
-        - 'xpack.security.enabled: false'
-        - 'xpack.security.transport.ssl.enabled: false'
-        - 'xpack.security.http.ssl.enabled: false'
-  when: ansible_os_family == "Debian"
-
-# ------------------ REDHAT FAMILY TASKS ------------------
-- name: Clean up Elasticsearch configs on RedHat
+# ---------------- AMAZON LINUX ----------------
+- name: Cleanup Elasticsearch configs (Amazon)
   file:
     path: "{{ item }}"
     state: absent
-  with_items:
-    - /etc/elasticsearch/elasticsearch.keystore
-    - /usr/share/elasticsearch/config/certs
-    - /usr/share/elasticsearch/config/elasticsearch.keystore
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-
-- name: Install dependencies on RedHat
-  yum:
-    name:
-      - java-17-openjdk
-      - nginx
-      - wget
-      - vim
-    state: present
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-
-- name: Import the Elasticsearch GPG key on RedHat
-  rpm_key:
-    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-    state: present
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-
-- name: Add Elasticsearch repo on RedHat
-  get_url:
-    url: https://artifacts.elastic.co/packages/8.x/yum/elasticsearch.repo
-    dest: /etc/yum.repos.d/elasticsearch.repo
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-
-- name: Install Elasticsearch on RedHat
-  yum:
-    name: elasticsearch
-    state: present
-  notify:
-    - Enable Elasticsearch
-    - Start Elasticsearch
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-
-- name: Configure elasticsearch.yml on RedHat
-  block:
-    - name: Set network.host to 0.0.0.0
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^#?network.host:'
-        line: 'network.host: 0.0.0.0'
-
-    - name: Set http.port to 9200
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^#?http.port:'
-        line: 'http.port: 9200'
-
-    - name: Disable security for demo
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        line: '{{ item }}'
-        create: yes
-      loop:
-        - 'xpack.security.enabled: false'
-        - 'xpack.security.transport.ssl.enabled: false'
-        - 'xpack.security.http.ssl.enabled: false'
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-
-# ------------------ AMAZON LINUX TASKS ------------------
-- name: Clean up Elasticsearch configs on Amazon Linux
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
+  loop:
     - /etc/elasticsearch/elasticsearch.keystore
     - /usr/share/elasticsearch/config/certs
     - /usr/share/elasticsearch/config/elasticsearch.keystore
   when: ansible_distribution == "Amazon"
 
-- name: Install dependencies on Amazon Linux
+- name: Install dependencies (Amazon)
   yum:
     name:
-      - java-11-amazon-corretto
+      - java-17-amazon-corretto
       - nginx
       - wget
       - vim
     state: present
   when: ansible_distribution == "Amazon"
 
-- name: Import the Elasticsearch GPG key on Amazon Linux
+- name: Import GPG key (Amazon)
   rpm_key:
     key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
     state: present
   when: ansible_distribution == "Amazon"
 
-- name: Add Elasticsearch repo on Amazon Linux manually
+- name: Add Elasticsearch repo (Amazon)
   copy:
     dest: /etc/yum.repos.d/elasticsearch.repo
     content: |
       [elasticsearch]
-      name=Elasticsearch repository for 8.x packages
+      name=Elasticsearch repository
       baseurl=https://artifacts.elastic.co/packages/8.x/yum
       gpgcheck=1
       gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
       enabled=1
-      autorefresh=1
-      type=rpm-md
   when: ansible_distribution == "Amazon"
 
-- name: Install Elasticsearch on Amazon Linux
+- name: Install Elasticsearch (Amazon)
   yum:
     name: elasticsearch
     state: present
-  notify:
-    - Enable Elasticsearch
-    - Start Elasticsearch
   when: ansible_distribution == "Amazon"
+  notify: 
+    - Enable Elasticsearch
+    - Restart Elasticsearch
 
-- name: Configure elasticsearch.yml on Amazon Linux
+# ---------------- COMMON CONFIG ----------------
+- name: Configure elasticsearch.yml
   block:
-    - name: Set network.host to 0.0.0.0
+    - name: Set network.host
       lineinfile:
         path: /etc/elasticsearch/elasticsearch.yml
         regexp: '^#?network.host:'
         line: 'network.host: 0.0.0.0'
 
-    - name: Set http.port to 9200
+    - name: Set http.port
       lineinfile:
         path: /etc/elasticsearch/elasticsearch.yml
         regexp: '^#?http.port:'
         line: 'http.port: 9200'
 
-    - name: Disable security for demo
+    - name: Disable security
       lineinfile:
         path: /etc/elasticsearch/elasticsearch.yml
         line: '{{ item }}'
@@ -221,71 +130,26 @@
         - 'xpack.security.enabled: false'
         - 'xpack.security.transport.ssl.enabled: false'
         - 'xpack.security.http.ssl.enabled: false'
-  when: ansible_distribution == "Amazon"
+  when: ansible_os_family in ["Debian", "RedHat"] or ansible_distribution == "Amazon"
 
-# ------------------ SUSE FAMILY TASKS ------------------
-- name: Clean up Elasticsearch configs on SUSE
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - /etc/elasticsearch/elasticsearch.keystore
-    - /usr/share/elasticsearch/config/certs
-    - /usr/share/elasticsearch/config/elasticsearch.keystore
-  when: ansible_os_family == "Suse"
+- name: Set JVM heap size to 512m
+  lineinfile:
+    path: /etc/elasticsearch/jvm.options
+    regexp: '^-Xms'
+    line: '-Xms512m'
+  notify: Restart Elasticsearch
 
-- name: Install dependencies on SUSE
-  zypper:
-    name:
-      - java-17-openjdk
-      - nginx
-      - wget
-      - vim
-    state: present
-  when: ansible_os_family == "Suse"
+- name: Set JVM max heap size to 512m
+  lineinfile:
+    path: /etc/elasticsearch/jvm.options
+    regexp: '^-Xmx'
+    line: '-Xmx512m'
+  notify: Restart Elasticsearch
 
-- name: Import Elasticsearch GPG key on SUSE
-  rpm_key:
-    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-    state: present
-  when: ansible_os_family == "Suse"
+- name: Reload systemd
+  command: systemctl daemon-reexec
+  become: yes
 
-- name: Add Elasticsearch repo on SUSE
-  get_url:
-    url: https://artifacts.elastic.co/packages/8.x/yum/elasticsearch.repo
-    dest: /etc/zypp/repos.d/elasticsearch.repo
-  when: ansible_os_family == "Suse"
-
-- name: Install Elasticsearch on SUSE
-  zypper:
-    name: elasticsearch
-    state: present
-  notify:
-    - Enable Elasticsearch
-    - Start Elasticsearch
-  when: ansible_os_family == "Suse"
-
-- name: Configure elasticsearch.yml on SUSE
-  block:
-    - name: Set network.host to 0.0.0.0
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^#?network.host:'
-        line: 'network.host: 0.0.0.0'
-
-    - name: Set http.port to 9200
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^#?http.port:'
-        line: 'http.port: 9200'
-
-    - name: Disable security for demo
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        line: '{{ item }}'
-        create: yes
-      loop:
-        - 'xpack.security.enabled: false'
-        - 'xpack.security.transport.ssl.enabled: false'
-        - 'xpack.security.http.ssl.enabled: false'
-  when: ansible_os_family == "Suse"
+- name: Force systemd reload
+  systemd:
+    daemon_reload: yes
