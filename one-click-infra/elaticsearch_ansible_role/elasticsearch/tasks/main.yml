@@ -1,4 +1,3 @@
-
 # ------------------ DEBIAN FAMILY TASKS ------------------
 - name: Update apt repo and cache
   apt:
@@ -48,6 +47,21 @@
     - Restart Elasticsearch
   when: ansible_os_family == "Debian"
 
+- name: Configure elasticsearch.yml on Debian
+  block:
+    - name: Set network.host to 0.0.0.0
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?network.host:'
+        line: 'network.host: 0.0.0.0'
+
+    - name: Set http.port to 9200
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?http.port:'
+        line: 'http.port: 9200'
+  when: ansible_os_family == "Debian"
+
 # ------------------ REDHAT FAMILY TASKS ------------------
 - name: Install dependencies on RedHat
   yum:
@@ -79,6 +93,21 @@
     - Start Elasticsearch
     - Enable Elasticsearch
     - Restart Elasticsearch
+  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+
+- name: Configure elasticsearch.yml on RedHat
+  block:
+    - name: Set network.host to 0.0.0.0
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?network.host:'
+        line: 'network.host: 0.0.0.0'
+
+    - name: Set http.port to 9200
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?http.port:'
+        line: 'http.port: 9200'
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 # ------------------ AMAZON LINUX TASKS ------------------
@@ -122,6 +151,21 @@
     - Restart Elasticsearch
   when: ansible_distribution == "Amazon"
 
+- name: Configure elasticsearch.yml on Amazon Linux
+  block:
+    - name: Set network.host to 0.0.0.0
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?network.host:'
+        line: 'network.host: 0.0.0.0'
+
+    - name: Set http.port to 9200
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?http.port:'
+        line: 'http.port: 9200'
+  when: ansible_distribution == "Amazon"
+
 # ------------------ SUSE FAMILY TASKS ------------------
 - name: Install dependencies on SUSE
   zypper:
@@ -153,4 +197,19 @@
     - Start Elasticsearch
     - Enable Elasticsearch
     - Restart Elasticsearch
+  when: ansible_os_family == "Suse"
+
+- name: Configure elasticsearch.yml on SUSE
+  block:
+    - name: Set network.host to 0.0.0.0
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?network.host:'
+        line: 'network.host: 0.0.0.0'
+
+    - name: Set http.port to 9200
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^#?http.port:'
+        line: 'http.port: 9200'
   when: ansible_os_family == "Suse"
