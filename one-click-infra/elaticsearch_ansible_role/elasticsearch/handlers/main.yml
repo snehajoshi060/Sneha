@@ -1,21 +1,12 @@
 ---
-# handlers file for elasticsearch
-
 - name: Enable Elasticsearch
   systemd:
     name: elasticsearch
-    enabled: yes
-    daemon_reload: yes
-
-- name: Start Elasticsearch
-  systemd:
-    name: elasticsearch
-    state: started
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 - name: Restart Elasticsearch
   systemd:
     name: elasticsearch
     state: restarted
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
