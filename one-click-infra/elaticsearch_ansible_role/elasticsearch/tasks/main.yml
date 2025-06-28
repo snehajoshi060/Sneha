@@ -3,12 +3,11 @@
   file:
     path: "{{ item }}"
     state: absent
-  loop:
+  with_items:
     - /etc/elasticsearch/elasticsearch.keystore
     - /usr/share/elasticsearch/config/certs
     - /usr/share/elasticsearch/config/elasticsearch.keystore
   when: ansible_os_family == "Debian"
-  ignore_errors: yes
 
 - name: Update apt repo and cache
   apt:
@@ -53,9 +52,8 @@
     state: present
     update_cache: yes
   notify:
-    - Start Elasticsearch
     - Enable Elasticsearch
-    - Restart Elasticsearch
+    - Start Elasticsearch
   when: ansible_os_family == "Debian"
 
 - name: Configure elasticsearch.yml on Debian
@@ -88,12 +86,11 @@
   file:
     path: "{{ item }}"
     state: absent
-  loop:
+  with_items:
     - /etc/elasticsearch/elasticsearch.keystore
     - /usr/share/elasticsearch/config/certs
     - /usr/share/elasticsearch/config/elasticsearch.keystore
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-  ignore_errors: yes
 
 - name: Install dependencies on RedHat
   yum:
@@ -122,9 +119,8 @@
     name: elasticsearch
     state: present
   notify:
-    - Start Elasticsearch
     - Enable Elasticsearch
-    - Restart Elasticsearch
+    - Start Elasticsearch
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 - name: Configure elasticsearch.yml on RedHat
@@ -157,12 +153,11 @@
   file:
     path: "{{ item }}"
     state: absent
-  loop:
+  with_items:
     - /etc/elasticsearch/elasticsearch.keystore
     - /usr/share/elasticsearch/config/certs
     - /usr/share/elasticsearch/config/elasticsearch.keystore
   when: ansible_distribution == "Amazon"
-  ignore_errors: yes
 
 - name: Install dependencies on Amazon Linux
   yum:
@@ -199,9 +194,8 @@
     name: elasticsearch
     state: present
   notify:
-    - Start Elasticsearch
     - Enable Elasticsearch
-    - Restart Elasticsearch
+    - Start Elasticsearch
   when: ansible_distribution == "Amazon"
 
 - name: Configure elasticsearch.yml on Amazon Linux
@@ -234,12 +228,11 @@
   file:
     path: "{{ item }}"
     state: absent
-  loop:
+  with_items:
     - /etc/elasticsearch/elasticsearch.keystore
     - /usr/share/elasticsearch/config/certs
     - /usr/share/elasticsearch/config/elasticsearch.keystore
   when: ansible_os_family == "Suse"
-  ignore_errors: yes
 
 - name: Install dependencies on SUSE
   zypper:
@@ -268,9 +261,8 @@
     name: elasticsearch
     state: present
   notify:
-    - Start Elasticsearch
     - Enable Elasticsearch
-    - Restart Elasticsearch
+    - Start Elasticsearch
   when: ansible_os_family == "Suse"
 
 - name: Configure elasticsearch.yml on SUSE
