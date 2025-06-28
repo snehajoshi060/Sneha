@@ -1,4 +1,15 @@
 # ------------------ DEBIAN FAMILY TASKS ------------------
+- name: Clean up Elasticsearch configs on Debian
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/elasticsearch/elasticsearch.keystore
+    - /usr/share/elasticsearch/config/certs
+    - /usr/share/elasticsearch/config/elasticsearch.keystore
+  when: ansible_os_family == "Debian"
+  ignore_errors: yes
+
 - name: Update apt repo and cache
   apt:
     update_cache: yes
@@ -73,6 +84,17 @@
   when: ansible_os_family == "Debian"
 
 # ------------------ REDHAT FAMILY TASKS ------------------
+- name: Clean up Elasticsearch configs on RedHat
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/elasticsearch/elasticsearch.keystore
+    - /usr/share/elasticsearch/config/certs
+    - /usr/share/elasticsearch/config/elasticsearch.keystore
+  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+  ignore_errors: yes
+
 - name: Install dependencies on RedHat
   yum:
     name:
@@ -131,6 +153,17 @@
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 # ------------------ AMAZON LINUX TASKS ------------------
+- name: Clean up Elasticsearch configs on Amazon Linux
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/elasticsearch/elasticsearch.keystore
+    - /usr/share/elasticsearch/config/certs
+    - /usr/share/elasticsearch/config/elasticsearch.keystore
+  when: ansible_distribution == "Amazon"
+  ignore_errors: yes
+
 - name: Install dependencies on Amazon Linux
   yum:
     name:
@@ -197,6 +230,17 @@
   when: ansible_distribution == "Amazon"
 
 # ------------------ SUSE FAMILY TASKS ------------------
+- name: Clean up Elasticsearch configs on SUSE
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/elasticsearch/elasticsearch.keystore
+    - /usr/share/elasticsearch/config/certs
+    - /usr/share/elasticsearch/config/elasticsearch.keystore
+  when: ansible_os_family == "Suse"
+  ignore_errors: yes
+
 - name: Install dependencies on SUSE
   zypper:
     name:
