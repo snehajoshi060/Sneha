@@ -60,6 +60,22 @@
         path: /etc/elasticsearch/elasticsearch.yml
         regexp: '^#?http.port:'
         line: 'http.port: 9200'
+
+    - name: Enable security and bootstrap password reset
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        line: '{{ item }}'
+        create: yes
+      loop:
+        - 'xpack.security.enabled: true'
+        - 'xpack.security.authc.api_key.enabled: true'
+  when: ansible_os_family == "Debian"
+
+- name: Reset elastic user password (Debian)
+  shell: "/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic --batch --password '{{ elastic_password }}'"
+  environment:
+    ES_PATH_CONF: /etc/elasticsearch
+  ignore_errors: yes
   when: ansible_os_family == "Debian"
 
 # ------------------ REDHAT FAMILY TASKS ------------------
@@ -108,6 +124,22 @@
         path: /etc/elasticsearch/elasticsearch.yml
         regexp: '^#?http.port:'
         line: 'http.port: 9200'
+
+    - name: Enable security and bootstrap password reset
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        line: '{{ item }}'
+        create: yes
+      loop:
+        - 'xpack.security.enabled: true'
+        - 'xpack.security.authc.api_key.enabled: true'
+  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+
+- name: Reset elastic user password (RedHat)
+  shell: "/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic --batch --password '{{ elastic_password }}'"
+  environment:
+    ES_PATH_CONF: /etc/elasticsearch
+  ignore_errors: yes
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 # ------------------ AMAZON LINUX TASKS ------------------
@@ -164,6 +196,22 @@
         path: /etc/elasticsearch/elasticsearch.yml
         regexp: '^#?http.port:'
         line: 'http.port: 9200'
+
+    - name: Enable security and bootstrap password reset
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        line: '{{ item }}'
+        create: yes
+      loop:
+        - 'xpack.security.enabled: true'
+        - 'xpack.security.authc.api_key.enabled: true'
+  when: ansible_distribution == "Amazon"
+
+- name: Reset elastic user password (Amazon Linux)
+  shell: "/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic --batch --password '{{ elastic_password }}'"
+  environment:
+    ES_PATH_CONF: /etc/elasticsearch
+  ignore_errors: yes
   when: ansible_distribution == "Amazon"
 
 # ------------------ SUSE FAMILY TASKS ------------------
@@ -212,4 +260,20 @@
         path: /etc/elasticsearch/elasticsearch.yml
         regexp: '^#?http.port:'
         line: 'http.port: 9200'
+
+    - name: Enable security and bootstrap password reset
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        line: '{{ item }}'
+        create: yes
+      loop:
+        - 'xpack.security.enabled: true'
+        - 'xpack.security.authc.api_key.enabled: true'
+  when: ansible_os_family == "Suse"
+
+- name: Reset elastic user password (SUSE)
+  shell: "/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic --batch --password '{{ elastic_password }}'"
+  environment:
+    ES_PATH_CONF: /etc/elasticsearch
+  ignore_errors: yes
   when: ansible_os_family == "Suse"
